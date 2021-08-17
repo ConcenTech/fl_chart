@@ -1,4 +1,5 @@
 import 'package:example/radar_chart/radar_chart_page.dart';
+import 'package:example/radial_chart/radial_chart_page.dart';
 import 'package:example/scatter_chart/scatter_chart_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final _duration = Duration(milliseconds: 300);
   final _curve = Curves.easeInOutCubic;
   final _pages = [
+    RadialChartPage(),
     LineChartPage(),
     BarChartPage(),
     BarChartPage2(),
