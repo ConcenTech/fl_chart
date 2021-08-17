@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:fl_chart/src/chart/radar_chart/radar_chart_data.dart';
+import 'package:fl_chart/src/chart/radial_chart/radial_chart_data.dart';
 import 'package:fl_chart/src/chart/scatter_chart/scatter_chart_data.dart';
 import 'package:flutter/animation.dart';
 
@@ -117,3 +118,8 @@ List<RadarDataSet>? lerpRadarDataSetList(List<RadarDataSet>? a, List<RadarDataSe
 /// Lerps [RadarEntry] list based on [t] value, check [Tween.lerp].
 List<RadarEntry>? lerpRadarEntryList(List<RadarEntry>? a, List<RadarEntry>? b, double t) =>
     _lerpList(a, b, t, lerp: RadarEntry.lerp);
+
+/// Lerps [RadialChartSectionData] list based on [t] value, check [Tween.lerp].
+List<RadialChartSectionData>? lerpRadialChartSectionDataList(
+        List<RadialChartSectionData>? a, List<RadialChartSectionData>? b, double t) =>
+    _lerpList(a, b, t, lerp: RadialChartSectionData.lerp);
