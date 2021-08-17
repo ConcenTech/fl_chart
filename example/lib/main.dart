@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
     RadarChartPage(),
   ];
 
-  bool get isDesktopOrWeb => PlatformInfo().isDesktopOS() || PlatformInfo().isWeb();
+  bool get isDesktopOrWeb => kIsWeb || PlatformInfo().isDesktopOS();
 
   @override
   void initState() {
