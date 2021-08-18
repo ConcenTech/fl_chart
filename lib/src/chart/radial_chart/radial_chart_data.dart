@@ -55,7 +55,7 @@ class RadialChartData extends BaseChartData with EquatableMixin {
   /// You can modify [radialTouchData] to customize touch behaviors and responses.
   RadialChartData({
     List<RadialChartSectionData>? sections,
-    double centerSpaceRadius = 20,
+    double? centerSpaceRadius,
     double? sectionEndRadius,
     Color? centerSpaceColor,
     double? sectionsSpace,
@@ -65,7 +65,7 @@ class RadialChartData extends BaseChartData with EquatableMixin {
     RadialTouchData? radialTouchData,
     FlBorderData? borderData,
   })  : sections = sections ?? const [],
-        centerSpaceRadius = centerSpaceRadius < 5 ? 5.0 : centerSpaceRadius,
+        centerSpaceRadius = centerSpaceRadius ?? double.infinity,
         showSectionsSpace = showSectionsSpace ?? false,
         sectionEndRadius = sectionEndRadius ?? 10,
         centerSpaceColor = centerSpaceColor ?? Colors.transparent,

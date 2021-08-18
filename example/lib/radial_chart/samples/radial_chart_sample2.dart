@@ -56,7 +56,6 @@ class RadialChart2State extends State {
                       show: false,
                     ),
                     sectionsSpace: 0,
-                    centerSpaceRadius: 400,
                     sections: [
                       RadialChartSectionData(
                         color: const Color(0xff0293ee),

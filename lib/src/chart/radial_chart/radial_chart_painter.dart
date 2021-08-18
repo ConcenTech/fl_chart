@@ -164,6 +164,7 @@ class RadialChartPainter extends BaseChartPainter<RadialChartData> {
     Rect sectionRadiusRect,
     Rect centerRadiusRect,
     double sectionArc,
+    // double sectionGap,
   ) {
     final sweepRadians = endRadians - startRadians;
     return Path()
