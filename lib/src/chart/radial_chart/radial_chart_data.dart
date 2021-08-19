@@ -18,16 +18,11 @@ class RadialChartData extends BaseChartData with EquatableMixin {
   /// Radius of free space in center of the circle.
   final double centerSpaceRadius;
 
-  /// Defines the thickness of all sections.
-  final double sectionThickness;
-
   /// Color of free space in center of the circle.
   final Color centerSpaceColor;
 
   /// Defines gap between sections.
   final double sectionsSpace;
-
-  final bool showSectionsSpace;
 
   /// Defines the curve of the end of sections
   final double sectionEndRadius;
@@ -66,11 +61,9 @@ class RadialChartData extends BaseChartData with EquatableMixin {
     FlBorderData? borderData,
   })  : sections = sections ?? const [],
         centerSpaceRadius = centerSpaceRadius ?? double.infinity,
-        showSectionsSpace = showSectionsSpace ?? false,
         sectionEndRadius = sectionEndRadius ?? 10,
         centerSpaceColor = centerSpaceColor ?? Colors.transparent,
         sectionsSpace = sectionsSpace ?? 2,
-        sectionThickness = sectionThickness ?? 40,
         startDegreeOffset = startDegreeOffset ?? 0,
         radialTouchData = radialTouchData ?? RadialTouchData(),
         super(
@@ -107,8 +100,7 @@ class RadialChartData extends BaseChartData with EquatableMixin {
       return RadialChartData(
         borderData: FlBorderData.lerp(a.borderData, b.borderData, t),
         centerSpaceColor: Color.lerp(a.centerSpaceColor, b.centerSpaceColor, t),
-        centerSpaceRadius:
-            lerpDoubleAllowInfinity(a.centerSpaceRadius, b.centerSpaceRadius, t) ?? 20.0,
+        centerSpaceRadius: lerpDoubleAllowInfinity(a.centerSpaceRadius, b.centerSpaceRadius, t),
         radialTouchData: b.radialTouchData,
         sectionsSpace: lerpDouble(a.sectionsSpace, b.sectionsSpace, t),
         startDegreeOffset: lerpDouble(a.startDegreeOffset, b.startDegreeOffset, t),
@@ -132,12 +124,6 @@ class RadialChartData extends BaseChartData with EquatableMixin {
       ];
 }
 
-class RadialChartStack {
-  final List<RadialChartData> chartData;
-
-  RadialChartStack({required this.chartData});
-}
-
 /// Holds data related to drawing each [RadialChart] section.
 class RadialChartSectionData {
   /// It determines how much space it should occupy around the circle.
@@ -150,6 +136,9 @@ class RadialChartSectionData {
 
   /// Defines the color of section.
   final Color color;
+
+  /// Defines the radius of section.
+  final double radius;
 
   /// Defines show or hide the title of section.
   final bool showTitle;
@@ -205,6 +194,7 @@ class RadialChartSectionData {
   RadialChartSectionData({
     double? value,
     Color? color,
+    double? radius,
     bool? showTitle,
     TextStyle? titleStyle,
     String? title,
@@ -214,6 +204,7 @@ class RadialChartSectionData {
     double? badgePositionPercentageOffset,
   })  : value = value ?? 10,
         color = color ?? Colors.cyan,
+        radius = radius ?? 40,
         showTitle = showTitle ?? true,
         titleStyle = titleStyle,
         title = title ?? value.toString(),
@@ -239,6 +230,7 @@ class RadialChartSectionData {
     return RadialChartSectionData(
       value: value ?? this.value,
       color: color ?? this.color,
+      radius: radius ?? this.radius,
       showTitle: showTitle ?? this.showTitle,
       titleStyle: titleStyle ?? this.titleStyle,
       title: title ?? this.title,
@@ -256,6 +248,7 @@ class RadialChartSectionData {
     return RadialChartSectionData(
       value: lerpDouble(a.value, b.value, t),
       color: Color.lerp(a.color, b.color, t),
+      radius: lerpDouble(a.radius, b.radius, t),
       showTitle: b.showTitle,
       titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
       title: b.title,
@@ -269,9 +262,6 @@ class RadialChartSectionData {
   }
 }
 
-/// [RadialChart]'s touch callback.
-typedef RadialTouchCallback = void Function(RadialTouchResponse);
-
 /// Holds data to handle touch events, and touch responses in the [RadialChart].
 ///
 /// There is a touch flow, explained [here](https://github.com/imaNNeoFighT/fl_chart/blob/master/repo_files/documentations/handle_touches.md)
@@ -279,7 +269,7 @@ typedef RadialTouchCallback = void Function(RadialTouchResponse);
 /// to the painter, and gets touched spot, and wraps it into a concrete [RadialTouchResponse].
 class RadialTouchData extends FlTouchData with EquatableMixin {
   /// you can implement it to receive touches callback
-  final Function(RadialTouchResponse)? touchCallback;
+  final BaseTouchCallback<RadialTouchResponse>? touchCallback;
 
   /// You can disable or enable the touch system using [enabled] flag,
   ///
@@ -288,7 +278,7 @@ class RadialTouchData extends FlTouchData with EquatableMixin {
   /// useful information about happened touch.
   RadialTouchData({
     bool? enabled,
-    RadialTouchCallback? touchCallback,
+    BaseTouchCallback<RadialTouchResponse>? touchCallback,
   })  : touchCallback = touchCallback,
         super(enabled ?? true);
 
@@ -345,29 +335,17 @@ class RadialTouchResponse extends BaseTouchResponse {
   final RadialTouchedSection? touchedSection;
 
   /// If touch happens, [RadialChart] processes it internally and passes out a [RadialTouchResponse]
-  /// that contains [touchedSection], [touchedSectionIndex] that tells
-  /// you touch happened on which section,
-  /// [touchAngle] gives you angle of touch,
-  /// and [touchRadius] gives you radius of the touch.
-  /// [touchInput] is the type of happened touch.
-  RadialTouchResponse(
-    RadialTouchedSection? touchedSection,
-    PointerEvent touchInput,
-    bool clickHappened,
-  )   : touchedSection = touchedSection,
-        super(touchInput, clickHappened);
+  RadialTouchResponse(RadialTouchedSection? touchedSection)
+      : touchedSection = touchedSection,
+        super();
 
-  /// Coradials current [RadialTouchResponse] to a new [RadialTouchResponse],
+  /// Copies current [RadialTouchResponse] to a new [RadialTouchResponse],
   /// and replaces provided values.
   RadialTouchResponse copyWith({
     RadialTouchedSection? touchedSection,
-    PointerEvent? touchInput,
-    bool? clickHappened,
   }) {
     return RadialTouchResponse(
       touchedSection ?? this.touchedSection,
-      touchInput ?? this.touchInput,
-      clickHappened ?? this.clickHappened,
     );
   }
 }

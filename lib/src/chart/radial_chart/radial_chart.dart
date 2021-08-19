@@ -43,59 +43,28 @@ class _RadialChartState extends AnimatedWidgetBaseState<RadialChart> {
     super.initState();
   }
 
-  RadialChartData _dataWithSpacesIfRequired() {
-    if (widget.data.showSectionsSpace) {
-      var newData = <RadialChartSectionData>[];
-      for (var section in widget.data.sections) {
-        newData.add(section);
-        if (section.value > 0) {
-          newData.add(_emptySection);
-        }
-      }
-      return widget.data.copyWith(sections: newData);
-    }
-    return widget.data;
-  }
-
   @override
   Widget build(BuildContext context) {
     final showingData = _getData();
 
-    /// Wr wrapped our chart with [GestureDetector], and onLongPressStart callback.
-    /// because we wanted to lock the widget from being scrolled when user long presses on it.
-    /// If we found a solution for solve this issue, then we can remove this undoubtedly.
-    return GestureDetector(
-      onLongPressStart: (details) {},
-      child: RadialChartLeaf(
-        data: _radialChartDataTween!.evaluate(animation),
-        targetData: showingData,
-        touchCallback: (response) {
-          showingData.radialTouchData.touchCallback?.call(response);
-        },
-      ),
+    return RadialChartLeaf(
+      data: _radialChartDataTween!.evaluate(animation),
+      targetData: showingData,
     );
   }
 
   /// if builtIn touches are enabled, we should recreate our [radialChartData]
   /// to handle built in touches
   RadialChartData _getData() {
-    return _dataWithSpacesIfRequired();
-  }
-
-  RadialChartSectionData get _emptySection {
-    return RadialChartSectionData(
-      value: 0.5,
-      showTitle: false,
-      color: Colors.transparent,
-    );
+    return widget.data;
   }
 
   @override
   void forEachTween(visitor) {
     _radialChartDataTween = visitor(
       _radialChartDataTween,
-      _dataWithSpacesIfRequired(),
-      (dynamic value) => RadialChartDataTween(begin: value, end: _dataWithSpacesIfRequired()),
+      widget.data,
+      (dynamic value) => RadialChartDataTween(begin: value, end: widget.data),
     ) as RadialChartDataTween;
   }
 }

@@ -1,12 +1,13 @@
-import 'package:fl_chart/fl_chart.dart';
-import 'package:fl_chart/src/chart/base/base_chart/base_chart_painter.dart';
-import 'package:fl_chart/src/utils/canvas_wrapper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '../../../fl_chart.dart';
+import '../../utils/canvas_wrapper.dart';
+import '../base/base_chart/base_chart_painter.dart';
+import '../base/base_chart/render_base_chart.dart';
 import 'radial_chart_painter.dart';
 
 /// Low level RadialChart Widget.
@@ -15,7 +16,6 @@ class RadialChartLeaf extends MultiChildRenderObjectWidget {
     Key? key,
     required this.data,
     required this.targetData,
-    this.touchCallback,
   }) : super(
           key: key,
           children: targetData.sections.map((e) => e.badgeWidget).toList(),
@@ -23,15 +23,12 @@ class RadialChartLeaf extends MultiChildRenderObjectWidget {
 
   final RadialChartData data, targetData;
 
-  final RadialTouchCallback? touchCallback;
-
   @override
   RenderRadialChart createRenderObject(BuildContext context) => RenderRadialChart(
         context,
         data,
         targetData,
         MediaQuery.of(context).textScaleFactor,
-        touchCallback,
       );
 
   @override
@@ -39,13 +36,12 @@ class RadialChartLeaf extends MultiChildRenderObjectWidget {
     renderObject
       ..data = data
       ..targetData = targetData
-      ..textScale = MediaQuery.of(context).textScaleFactor
-      ..touchCallback = touchCallback;
+      ..textScale = MediaQuery.of(context).textScaleFactor;
   }
 }
 
 /// Renders our RadialChart, also handles hitTest.
-class RenderRadialChart extends RenderBox
+class RenderRadialChart extends RenderBaseChart<RadialTouchResponse>
     with
         ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData>
@@ -55,12 +51,11 @@ class RenderRadialChart extends RenderBox
     RadialChartData data,
     RadialChartData targetData,
     double textScale,
-    RadialTouchCallback? touchCallback,
   )   : _buildContext = context,
         _data = data,
         _targetData = targetData,
         _textScale = textScale,
-        _touchCallback = touchCallback;
+        super(targetData.radialTouchData.touchCallback);
 
   final BuildContext _buildContext;
 
@@ -90,20 +85,11 @@ class RenderRadialChart extends RenderBox
     markNeedsPaint();
   }
 
-  RadialTouchCallback? _touchCallback;
-  set touchCallback(RadialTouchCallback? value) {
-    _touchCallback = value;
-  }
-
   final _painter = RadialChartPainter();
 
   PaintHolder<RadialChartData> get paintHolder {
     return PaintHolder(data, targetData, textScale);
   }
-
-  RadialTouchedSection? _lastTouchedSpot;
-
-  late bool _validForMouseTracker;
 
   @override
   void setupParentData(RenderBox child) {
@@ -135,11 +121,6 @@ class RenderRadialChart extends RenderBox
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return Size(constraints.maxWidth, constraints.maxHeight);
-  }
-
-  @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     return defaultHitTestChildren(result, position: position);
   }
@@ -155,62 +136,8 @@ class RenderRadialChart extends RenderBox
   }
 
   @override
-  bool hitTestSelf(Offset position) => true;
-
-  @override
-  void handleEvent(PointerEvent event, covariant BoxHitTestEntry entry) {
-    assert(debugHandleEvent(event, entry));
-    _handleEvent(event);
-  }
-
-  @override
-  PointerExitEventListener? get onExit => (PointerExitEvent event) {
-        _handleEvent(event);
-      };
-
-  @override
-  PointerEnterEventListener? get onEnter => null;
-
-  @override
-  MouseCursor get cursor => MouseCursor.defer;
-
-  @override
-  bool get validForMouseTracker => _validForMouseTracker;
-
-  void _handleEvent(PointerEvent event) {
-    if (_touchCallback == null) {
-      return;
-    }
-    var response = RadialTouchResponse(null, event, false);
-
-    var touchedSection = _painter.handleTouch(event, size, paintHolder);
-    if (touchedSection == null) {
-      _touchCallback?.call(response);
-      return;
-    }
-    response = response.copyWith(touchedSection: touchedSection);
-
-    if (event is PointerDownEvent) {
-      _lastTouchedSpot = touchedSection;
-    } else if (event is PointerUpEvent) {
-      if (_lastTouchedSpot == touchedSection) {
-        response = response.copyWith(clickHappened: true);
-      }
-      _lastTouchedSpot = null;
-    }
-
-    _touchCallback?.call(response);
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _validForMouseTracker = true;
-  }
-
-  @override
-  void detach() {
-    _validForMouseTracker = false;
-    super.detach();
+  RadialTouchResponse getResponseAtLocation(Offset localPosition) {
+    final section = _painter.handleTouch(localPosition, size, paintHolder);
+    return RadialTouchResponse(section);
   }
 }
