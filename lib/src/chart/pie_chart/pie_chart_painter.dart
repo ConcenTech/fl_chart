@@ -47,7 +47,7 @@ class PieChartPainter extends BaseChartPainter<PieChartData> {
     final sectionsAngle = _calculateSectionsAngle(data.sections, data.sumValue);
     final centerRadius = _calculateCenterRadius(canvasWrapper.size, holder);
 
-    _drawCenterSpace(canvasWrapper, holder);
+    _drawCenterSpace(canvasWrapper, centerRadius, holder);
     _drawSections(canvasWrapper, sectionsAngle, centerRadius, holder);
     _drawTexts(context, canvasWrapper, holder, centerRadius);
   }
@@ -58,14 +58,15 @@ class PieChartPainter extends BaseChartPainter<PieChartData> {
     }).toList();
   }
 
-  void _drawCenterSpace(CanvasWrapper canvasWrapper, PaintHolder<PieChartData> holder) {
+  void _drawCenterSpace(
+      CanvasWrapper canvasWrapper, double centerRadius, PaintHolder<PieChartData> holder) {
     final data = holder.data;
     final viewSize = canvasWrapper.size;
     final centerX = viewSize.width / 2;
     final centerY = viewSize.height / 2;
 
     _centerSpacePaint.color = data.centerSpaceColor;
-    canvasWrapper.drawCircle(Offset(centerX, centerY), data.centerSpaceRadius, _centerSpacePaint);
+    canvasWrapper.drawCircle(Offset(centerX, centerY), centerRadius, _centerSpacePaint);
   }
 
   void _drawSections(
@@ -277,32 +278,32 @@ class PieChartPainter extends BaseChartPainter<PieChartData> {
     return (viewSize.shortestSide - (maxRadius * 2)) / 2;
   }
 
-  /// Makes a [PieTouchedSection] based on the provided [touchInput]
+  /// Makes a [PieTouchedSection] based on the provided [localPosition]
   ///
-  /// Processes [PointerEvent.localPosition] and checks
+  /// Processes [localPosition] and checks
   /// the elements of the chart that are near the offset,
   /// then makes a [PieTouchedSection] from the elements that has been touched.
   PieTouchedSection? handleTouch(
-    PointerEvent touchInput,
+    Offset localPosition,
     Size size,
     PaintHolder<PieChartData> holder,
   ) {
     final data = holder.data;
     final sectionsAngle = _calculateSectionsAngle(data.sections, data.sumValue);
-    return _getTouchedSection(size, touchInput, sectionsAngle, holder);
+    return _getTouchedSection(size, localPosition, sectionsAngle, holder);
   }
 
   /// find touched section by the value of [touchInputNotifier]
   PieTouchedSection? _getTouchedSection(
     Size viewSize,
-    PointerEvent touchInput,
+    Offset localPosition,
     List<double> sectionsAngle,
     PaintHolder<PieChartData> holder,
   ) {
     final data = holder.data;
     final center = Offset(viewSize.width / 2, viewSize.height / 2);
 
-    final touchedPoint2 = touchInput.localPosition - center;
+    final touchedPoint2 = localPosition - center;
 
     final touchX = touchedPoint2.dx;
     final touchY = touchedPoint2.dy;

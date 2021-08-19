@@ -121,28 +121,27 @@ class _LineChartSample3State extends State<LineChartSample3> {
                           );
                         }).toList();
                       }),
-                  touchCallback: (LineTouchResponse lineTouch) {
-                    final desiredTouch = lineTouch.touchInput is! PointerExitEvent &&
-                        lineTouch.touchInput is! PointerUpEvent;
-
-                    if (desiredTouch && lineTouch.lineBarSpots != null) {
-                      final value = lineTouch.lineBarSpots![0].x;
-
-                      if (value == 0 || value == 6) {
-                        setState(() {
-                          touchedValue = -1;
-                        });
-                        return null;
-                      }
-
-                      setState(() {
-                        touchedValue = value;
-                      });
-                    } else {
+                  touchCallback: (FlTouchEvent event, LineTouchResponse? lineTouch) {
+                    if (!event.isInterestedForInteractions ||
+                        lineTouch == null ||
+                        lineTouch.lineBarSpots == null) {
                       setState(() {
                         touchedValue = -1;
                       });
+                      return;
                     }
+                    final value = lineTouch.lineBarSpots![0].x;
+
+                    if (value == 0 || value == 6) {
+                      setState(() {
+                        touchedValue = -1;
+                      });
+                      return null;
+                    }
+
+                    setState(() {
+                      touchedValue = value;
+                    });
                   }),
               extraLinesData: ExtraLinesData(horizontalLines: [
                 HorizontalLine(

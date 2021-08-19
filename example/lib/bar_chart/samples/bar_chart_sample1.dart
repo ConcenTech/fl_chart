@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/gestures.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:example/utils/color_extensions.dart';
@@ -201,15 +200,15 @@ class BarChartSample1State extends State<BarChartSample1> {
                 ],
               );
             }),
-        touchCallback: (barTouchResponse) {
+        touchCallback: (FlTouchEvent event, barTouchResponse) {
           setState(() {
-            if (barTouchResponse.spot != null &&
-                barTouchResponse.touchInput is! PointerUpEvent &&
-                barTouchResponse.touchInput is! PointerExitEvent) {
-              touchedIndex = barTouchResponse.spot!.touchedBarGroupIndex;
-            } else {
+            if (!event.isInterestedForInteractions ||
+                barTouchResponse == null ||
+                barTouchResponse.spot == null) {
               touchedIndex = -1;
+              return;
             }
+            touchedIndex = barTouchResponse.spot!.touchedBarGroupIndex;
           });
         },
       ),
